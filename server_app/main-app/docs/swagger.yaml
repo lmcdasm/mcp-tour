@@ -1,0 +1,135 @@
+basePath: /
+definitions:
+  jsonschema.Schema:
+    type: object
+  main.AddMcpServerComponentRequest:
+    type: object
+  main.CreateMcpServerRequest:
+    properties:
+      addr:
+        type: string
+      id:
+        type: string
+      version:
+        type: string
+    type: object
+  mcp.ToolAnnotations:
+    properties:
+      destructiveHint:
+        description: |-
+          If true, the tool may perform destructive updates to its environment. If
+          false, the tool performs only additive updates.
+
+          (This property is meaningful only when `readOnlyHint == false`)
+
+          Default: true
+        type: boolean
+      idempotentHint:
+        description: |-
+          If true, calling the tool repeatedly with the same arguments will have no
+          additional effect on the its environment.
+
+          (This property is meaningful only when `readOnlyHint == false`)
+
+          Default: false
+        type: boolean
+      openWorldHint:
+        description: |-
+          If true, this tool may interact with an "open world" of external entities. If
+          false, the tool's domain of interaction is closed. For example, the world of
+          a web search tool is open, whereas that of a memory tool is not.
+
+          Default: true
+        type: boolean
+      readOnlyHint:
+        description: |-
+          If true, the tool does not modify its environment.
+
+          Default: false
+        type: boolean
+      title:
+        description: A human-readable title for the tool.
+        type: string
+    type: object
+info:
+  contact: {}
+  description: APIs for MCP Server Instantiation, Configuration and Handling
+  title: MCP Explorer - MCP Server APIs
+  version: 0.0.2
+paths:
+  /servers:
+    get:
+      description: Basic Health Check to verify ServerManager is running
+      responses:
+        "200":
+          description: HC - ServerManager Running
+          schema:
+            type: string
+      summary: ServerManager HealthCheck
+      tags:
+      - servers
+  /servers/add_components:
+    post:
+      consumes:
+      - application/json
+      description: Adds Prompt, Resource and Tool elements to a given MCP Server Instance
+      parameters:
+      - description: Add McpServer Component Request Input
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.AddMcpServerComponentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: MCP Server - Add Server Components - Successfully added to
+            Instance
+          schema:
+            type: string
+        "400":
+          description: MCP Server - Add Server Components Failed - Invalid JSON
+          schema:
+            type: string
+        "500":
+          description: MCP Server - Add Server Components - Failed to Add Components
+            to Server
+          schema:
+            type: string
+      summary: Add MCP Component to Server (Prompt, Resource or Tool)
+      tags:
+      - servers
+  /servers/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates (Defines) a blank MCP Server Instance with a Unique ID
+        and Address in Runtime
+      parameters:
+      - description: Create McpServer Request Input
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateMcpServerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: MCP Server - Create Server Instance - Success - Instance Created
+          schema:
+            type: string
+        "400":
+          description: MCP Server - Create Server Instance - Failed - Invalid JSON
+          schema:
+            type: string
+        "500":
+          description: MCP Server - Create Server Instance - Failed - Error Adding
+            Server
+          schema:
+            type: string
+      summary: Create (define)  a new MCP Server Instance to the System
+      tags:
+      - servers
+swagger: "2.0"

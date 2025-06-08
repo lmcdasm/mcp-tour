@@ -16,6 +16,12 @@
 coverage.*
 *.coverprofile
 profile.cov
+mcp-go-client
+mcp-go-server
+client_app/stdio_example/mcp-go-client
+client_app/stdio_example/mcp-go-server
+client_app/main-app/mcp-go-client
+client_app/main-app/mcp-go-server
 client_app/mcp-go-client
 server_app/mcp-go-server
 explorer_ux/node_modules/*

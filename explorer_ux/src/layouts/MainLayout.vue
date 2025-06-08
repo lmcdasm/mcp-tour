@@ -15,7 +15,7 @@
           MCP Exploration App
         </q-toolbar-title>
 
-        <div>MCP-Tour v{{ $q.version }}</div>
+        <div>MCP-Tour v0.0.2</div>
       </q-toolbar>
     </q-header>
 
