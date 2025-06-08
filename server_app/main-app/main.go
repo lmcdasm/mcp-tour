@@ -1,59 +1,54 @@
 package main
 
-// @title MCP Explorer - MCP Server APIs
-// @version 0.0.2
-// @description APIs for MCP Server Instantiation, Configuration and Handling
-// @BasePath / 
-
 import (
-	// Std libs
 	"log"
-	"net/http"
-        "context"
 
-	// 3PP libs
-	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
+	ginprom "github.com/zsais/go-gin-prometheus"
 
-	// Our Libs
-	_ "mcp-go-server/docs" // Docs is geneated by SWAG CLI during build
-        "mcp-go-server/mcplib"
-        "mcp-go-server/manager"
-
- 	
+	_ "mcp-go-server/docs"
+	"mcp-go-server/manager"
 )
 
-type HiParams struct {
-        Name string `json:"name"`
-}
-
-func SayHi(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParams[HiParams]) (*mcp.CallToolResult, error) {
-        return &mcp.CallToolResult{
-                Content: []*mcp.Content{mcp.NewTextContent("Hi " + params.Name)},
-        }, nil
-}
+// @title MCP Explorer - MCP Server APIs
+// @version 0.0.3
+// @description APIs for MCP Server Instantiation, Configuration and Handling
+// @BasePath /
 
 func main() {
-	log.Printf("MCP Explorer - Server Manager Startup")
+	log.Println("MCP Explorer - Server Manager Startup")
 
-        // Create a MCP Server Manager
-        serverMgr := manager.NewServerManager()
-	log.Printf("MAIN - Creating new ServerManager")
+	// Create the MCP server manager instance
+	serverMgr := manager.NewServerManager()
 
+	// Setup Gin
+	mainRouter := gin.Default()
+	metricsRouter := gin.Default()
 
-	// Setup our Routes
-	initializeRoutes(serverMgr)
+	// Set up Swagger
+	mainRouter.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Server Swagger UI at /swagger/index.html
-	http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+	// Init API routes
+	initializeRoutes(mainRouter, serverMgr)
 
+	// Setup Prometheus metrics
+	prom := ginprom.NewPrometheus("mcp")
+	prom.Use(metricsRouter)
 
-	// Wrap this in a SSE handler
-	//handler := mcp.NewSSEHandler(func(r *http.Request) *mcp.Server {
-	//	return server
-	//})
+	// Start metrics server
+	go func() {
+		log.Println("Metrics server listening on :10011")
+		if err := metricsRouter.Run(":10011"); err != nil {
+			log.Fatalf("Metrics server error: %v", err)
+		}
+	}()
 
-	// Start HTTP server up
-	addr := ":10010"
-	log.Printf("MAIN - MCP SSE server listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	// Start API server
+	log.Println("MCP API server listening on :10010")
+	if err := mainRouter.Run(":10010"); err != nil {
+		log.Fatalf("API server error: %v", err)
+	}
 }
+
