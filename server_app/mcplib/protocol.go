@@ -7,7 +7,7 @@
 package mcp
 
 import (
-	"golang.org/x/tools/internal/mcp/jsonschema"
+	"mcp-go-server/mcplib/jsonschema"
 )
 
 // Optional annotations for the client. The client can use annotations to inform

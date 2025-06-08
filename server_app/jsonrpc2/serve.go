@@ -13,7 +13,7 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/tools/internal/event"
+	"mcp-go-server/event"
 )
 
 // NOTE: This file provides an experimental API for serving multiple remote

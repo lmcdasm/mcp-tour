@@ -14,10 +14,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"golang.org/x/tools/internal/event"
-	"golang.org/x/tools/internal/event/keys"
-	"golang.org/x/tools/internal/event/label"
-	"golang.org/x/tools/internal/jsonrpc2"
+	"mcp-go-server/event"
+	"mcp-go-server/event/keys"
+	"mcp-go-server/event/label"
+	"mcp-go-server/jsonrpc2"
 )
 
 // Binder builds a connection configuration.

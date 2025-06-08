@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"golang.org/x/tools/internal/mcp/internal/util"
+	"mcp-go-server/mcplib/internal/util"
 )
 
 // For constructs a JSON schema object for the given type argument.

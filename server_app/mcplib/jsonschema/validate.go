@@ -17,7 +17,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"golang.org/x/tools/internal/mcp/internal/util"
+	"mcp-go-server/mcplib/internal/util"
 )
 
 // The value of the "$schema" keyword for the version that we can validate.

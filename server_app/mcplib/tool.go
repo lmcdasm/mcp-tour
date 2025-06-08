@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"slices"
 
-	"golang.org/x/tools/internal/mcp/jsonschema"
+	"mcp-go-server/mcplib/jsonschema"
 )
 
 // A ToolHandler handles a call to tools/call.

@@ -7,8 +7,8 @@ package core
 import (
 	"context"
 
-	"golang.org/x/tools/internal/event/keys"
-	"golang.org/x/tools/internal/event/label"
+	"mcp-go-server/event/keys"
+	"mcp-go-server/event/label"
 )
 
 // Log1 takes a message and one label delivers a log event to the exporter.

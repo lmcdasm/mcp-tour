@@ -17,7 +17,7 @@ import (
 	"slices"
 	"sync"
 
-	jsonrpc2 "golang.org/x/tools/internal/jsonrpc2_v2"
+	jsonrpc2 "mcp-go-server/jsonrpc2_v2"
 )
 
 const DefaultPageSize = 1000

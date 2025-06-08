@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"sync"
 
-	"golang.org/x/tools/internal/mcp/internal/util"
+	"mcp-go-server/mcplib/internal/util"
 )
 
 func assert(cond bool, msg string) {
