@@ -18,6 +18,9 @@ coverage.*
 profile.cov
 client_app/mcp-go-client
 server_app/mcp-go-server
+explorer_ux/node_modules/*
+explorer_ux/node_modules
+explorer_ux/dist
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
