@@ -1,21 +1,27 @@
 <template>
   <q-card-section>
-    <div class="text-h6">Client Ops</div>
-    <q-list dense>
-      <q-item v-for="item in items" :key="item.id">
-        <q-item-section>{{ item.name }}</q-item-section>
-        <q-item-section side>
-          <q-btn dense flat icon="play_arrow" @click="start(item)" />
-          <q-btn dense flat icon="stop" @click="stop(item)" />
-          <q-btn dense flat icon="info" @click="info(item)" />
-        </q-item-section>
-      </q-item>
-    </q-list>
+    <div class="text-h6 q-mb-sm">Mcp Client Quick Operations</div>
+
+    <div
+      v-for="item in items"
+      :key="item.id"
+      class="row items-center justify-between q-pa-sm q-mb-xs bg-grey-1"
+      style="border: 1px solid #e0e0e0; border-radius: 6px;"
+    >
+      <div class="text-subtitle2">{{ item.name }}</div>
+
+      <div class="row q-gutter-sm">
+        <q-btn dense flat round size="sm" icon="play_arrow" @click="start(item)" />
+        <q-btn dense flat round size="sm" icon="stop" @click="stop(item)" />
+        <q-btn dense flat round size="sm" icon="info" @click="info(item)" />
+      </div>
+    </div>
   </q-card-section>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+
 const items = ref([])
 
 function updateList(newItems) {

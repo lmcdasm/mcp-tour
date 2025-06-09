@@ -27,7 +27,7 @@ type MCPServerFactory interface {
 type DefaultServerFactory struct {
 	id	string // Unique ID of this Factory - since we might want many later
 	workspace string
-	registry  map[string]*ServerBuildContext
+	Registry  map[string]*ServerBuildContext
 }
 
 func NewDefaultServerFactory(basePath string) *DefaultServerFactory {
@@ -45,19 +45,19 @@ func NewDefaultServerFactory(basePath string) *DefaultServerFactory {
 	return &DefaultServerFactory{
 		id: shortID,
 		workspace: resolvedPath,
-		registry:  make(map[string]*ServerBuildContext),
+		Registry:  make(map[string]*ServerBuildContext),
 	}
 
 }
 
 func (f *DefaultServerFactory) Define(def models.McpServerDefinition) error {
 	logr.Debugf("Define - def.ID: %v", def.ID)
-	for k := range f.registry {
+	for k := range f.Registry {
     		logr.Debugf("Registry already has key: %v", k)
 	}
 
-	if _, exists := f.registry[def.ID]; exists {
-		logr.Debugf("f.registry[def.ID] Output: %v", f.registry[def.ID])
+	if _, exists := f.Registry[def.ID]; exists {
+		logr.Debugf("f.Registry[def.ID] Output: %v", f.Registry[def.ID])
 		return fmt.Errorf("server ID %s already defined", def.ID)
 	}
 
@@ -67,12 +67,12 @@ func (f *DefaultServerFactory) Define(def models.McpServerDefinition) error {
 		Status:     models.StatusDefined,
 	}
 
-	f.registry[def.ID] = ctx
+	f.Registry[def.ID] = ctx
 	return nil
 }
 
 func (f *DefaultServerFactory) AddComponents(id string, comps models.McpServerComponents) error {
-	ctx, ok := f.registry[id]
+	ctx, ok := f.Registry[id]
 	if !ok {
 		return fmt.Errorf("no such server ID: %s", id)
 	}
@@ -84,7 +84,7 @@ func (f *DefaultServerFactory) AddComponents(id string, comps models.McpServerCo
 }
 
 func (f *DefaultServerFactory) Build(id string) error {
-	ctx, ok := f.registry[id]
+	ctx, ok := f.Registry[id]
 	if !ok {
 		return fmt.Errorf("server %s not found", id)
 	}
@@ -100,7 +100,7 @@ func (f *DefaultServerFactory) Stop(id string) error {
 }
 
 func (f *DefaultServerFactory) Status(id string) (models.McpServerStatus, error) {
-	ctx, ok := f.registry[id]
+	ctx, ok := f.Registry[id]
 	if !ok {
 		return "", fmt.Errorf("server %s not found", id)
 	}
@@ -114,7 +114,7 @@ func (f *DefaultServerFactory) AnnouceToRegistry(serverID, registryURI string) e
 
 // Helpers
 func (f *DefaultServerFactory) GetDefinition(id string) (*models.McpServerDefinition, error) {
-    ctx, ok := f.registry[id]
+    ctx, ok := f.Registry[id]
     if !ok {
         return nil, fmt.Errorf("server %s not found", id)
     }
@@ -123,7 +123,7 @@ func (f *DefaultServerFactory) GetDefinition(id string) (*models.McpServerDefini
 
 
 func (f *DefaultServerFactory) GetComponents(id string) (*models.McpServerComponents, error) {
-    ctx, ok := f.registry[id]
+    ctx, ok := f.Registry[id]
     if !ok {
         return nil, fmt.Errorf("server %s not found", id)
     }

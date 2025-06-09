@@ -1,13 +1,17 @@
 package api
 
 import (
+	// STD LIBs
 	"net/http"
 	"fmt"
 
+	// 3PP
 	"github.com/gin-gonic/gin"
+
+	// Our Stuff
 	"mcp-go-server/manager"
 	"mcp-go-server/models"
-	//mcplib "mcp-go-server/mcplib"
+	"mcp-go-server/metrics"
 )
 
 // @Summary ServerManager HealthCheck
@@ -55,6 +59,8 @@ func CreateMcpServerInstance(sm *manager.ServerManager) gin.HandlerFunc {
 			Status: "success",
 			Message: msg, 
 		})
+		metrics.IncMcpServerGauge()
+		return
 	}
 }
 

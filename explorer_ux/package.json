@@ -16,10 +16,15 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "chart.js": "^4.4.9",
     "pinia": "^3.0.3",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",
-    "vue-router": "^4.0.0"
+    "vue-canvas-gauge": "^1.0.5",
+    "vue-chartjs": "^5.3.2",
+    "vue-gauge": "^1.0.3",
+    "vue-router": "^4.0.0",
+    "vue3-chart-v2": "^0.8.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

@@ -3,7 +3,7 @@ import { boot } from 'quasar/wrappers'
 
 export default boot(() => {
   // const store = useMcpDashboardStore()
-  const evtSource = new EventSource('/api/stream')
+  const evtSource = new EventSource('http://192.168.1.131:10010/api/stream')
 
   evtSource.onmessage = (event) => {
     try {
@@ -27,10 +27,10 @@ export default boot(() => {
           window.__refs?.list_client?.value?.updateList(payload)
           break
         case 'list_server_ops':
-          window.__refs?.list_client?.value?.updateList(payload)
+          window.__refs?.list_server?.value?.updateList(payload)
           break
         case 'list_discovery_ops':
-          window.__refs?.list_client?.value?.updateList(payload)
+          window.__refs?.list_discovery?.value?.updateList(payload)
           break
 
         // Logs

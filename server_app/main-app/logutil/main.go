@@ -19,9 +19,12 @@ func InitLogger(component string) *logrus.Entry {
 	logger.SetLevel(logrus.DebugLevel)
 
 	// Use text formatter with timestamp
-	logger.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-	})
+	//logger.SetFormatter(&logrus.TextFormatter{
+	//	FullTimestamp: true,
+	//})
+
+	// Set Log Formatter (JSON for CKS-style/Loki style things)
+        logger.SetFormatter(&logrus.JSONFormatter{})
 
 	// Return an Entry pre-tagged with component field
 	return logger.WithField("component", component)
