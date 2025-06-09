@@ -12,8 +12,8 @@ import (
 	"mcp-go-server/logutil"
 )
 
-const version = "0.0.3"
-var component_name = "server-manager-main"
+const version = "0.0.4"
+var component_name = "server-main"
 var log = logutil.InitLogger(component_name)
 
 // @title MCP Explorer - MCP Server APIs
@@ -24,7 +24,8 @@ func main() {
 	log.Infof("MCP Explorer - Starting %s, version: %s", component_name, version)
 
 	// Init manager
-	serverMgr := manager.NewServerManager()
+	serverMgr := manager.NewServerManager("/mcp-workspace")
+	log.Infof("MCP Explorer - Mcp Server Manager started")
 
 	// Primary app router
 	mainRouter := gin.Default()

@@ -2,12 +2,16 @@ package manager
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
 	"mcp-go-server/mcplib"
+	"mcp-go-server/models"
+	"mcp-go-server/logutil"
 )
+
+var component_name_main = "server-manager-main"
+var log = logutil.InitLogger(component_name_main)
 
 type ServerInstance struct {
 	ID      string
@@ -20,38 +24,44 @@ type ServerInstance struct {
 type ServerManager struct {
 	mu      sync.Mutex
 	servers map[string]*ServerInstance
+
+	factory *DefaultServerFactory 
 }
 
-func NewServerManager() *ServerManager {
+func NewServerManager(workspace string) *ServerManager {
 	return &ServerManager{
 		servers: make(map[string]*ServerInstance),
+		factory: NewDefaultServerFactory(workspace),
 	}
 }
 
-func (sm *ServerManager) AddServer(id, addr string, version string) error {
+func (sm *ServerManager) AddServer(id, addr, version, transport, buildtype string) error {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
-	if _, exists := sm.servers[id]; exists {
-		return fmt.Errorf("server %s already exists", id)
+	// Create a definition using the full model structure
+	def := models.McpServerDefinition{
+		ID:        id,
+		Addr:      addr,
+		Version:   version,
+		Transport: transport,       // for now hardcode, later accept from CreateRequest
+		BuildType: buildtype,    // optional hook
 	}
 
-	srv := mcp.NewServer(id, version, nil)
+	if err := sm.factory.Define(def); err != nil {
+		return fmt.Errorf("factory define failed : %v", err)
+	}
 
-	handler := mcp.NewSSEHandler(func(r *http.Request) *mcp.Server {
-		return srv
-	})
-
+	// ServerManager has the lightweight reference of the McpServerInstance (without going deep) to the factory
 	sm.servers[id] = &ServerInstance{
-		ID:      id,
-		Addr:    addr,
-		Handler: handler,
-		Server:  srv,
-		Status:  "stopped",
+		ID:     id,
+		Addr:   addr,
+		Status: "defined",
 	}
 
 	return nil
 }
+
 
 func (sm *ServerManager) StartServer(id string) error {
 	sm.mu.Lock()
@@ -82,52 +92,121 @@ func (sm *ServerManager) RemoveServer(id string) {
 	delete(sm.servers, id)
 }
 
+func (sm *ServerManager) AddTools(id string, tools []models.ServerTool) error {
+    ctx, ok := sm.factory.registry[id]
+    if !ok {
+        return fmt.Errorf("server ID %s not found", id)
+    }
 
-//  Helper Functions to Add Prompts/Resources and Tools to a NewServer that has been defined.
-func (sm *ServerManager) AddTools(id string, tools []mcp.ServerTool) error {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+    // Initialize slice if needed
+    if ctx.Components.Tools == nil {
+        ctx.Components.Tools = []models.ServerTool{}
+    }
 
-	srv, ok := sm.servers[id]
-	if !ok {
-		return fmt.Errorf("server %s not found", id)
-	}
-	toolPtrs := make([]*mcp.ServerTool, len(tools))
-	for i := range tools {
-		toolPtrs[i] = &tools[i]
-	}
-	srv.Server.AddTools(toolPtrs...)
-	return nil
+    for _, t := range tools {
+        // Add metadata-only tool (defer full tool materialization to WriteMainGo)
+        ctx.Components.Tools = append(ctx.Components.Tools, models.ServerTool{
+            Name:        t.Name,
+            Description: t.Description,
+            FuncName:    fmt.Sprintf("%sFunc", t.Name), // convention
+        })
+    }
+
+    if ctx.Definition.BuildType == "binary" {
+        return writeMainGo(ctx, sm.factory.workspace)
+    }
+
+    return nil
+}
+func (sm *ServerManager) AddPrompts(id string, prompts []models.ServerPrompt) error {
+    ctx, ok := sm.factory.registry[id]
+    if !ok {
+        return fmt.Errorf("server ID %s not found", id)
+    }
+
+    if ctx.Components.Prompts == nil {
+        ctx.Components.Prompts = []models.ServerPrompt{}
+    }
+
+    for _, p := range prompts {
+        ctx.Components.Prompts = append(ctx.Components.Prompts, models.ServerPrompt{
+            Name:        p.Name,
+            Description: p.Description,
+            Arguments:   p.Arguments,
+            HandlerName: fmt.Sprintf("%sPromptHandler", p.Name), // convention
+        })
+    }
+
+    if ctx.Definition.BuildType == "binary" {
+        return writeMainGo(ctx, sm.factory.workspace)
+    }
+
+    return nil
 }
 
-func (sm *ServerManager) AddPrompts(id string, prompts []mcp.ServerPrompt) error {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+func (sm *ServerManager) AddResources(id string, resources []models.ServerResource) error {
+    ctx, ok := sm.factory.registry[id]
+    if !ok {
+        return fmt.Errorf("server ID %s not found", id)
+    }
 
-	srv, ok := sm.servers[id]
-	if !ok {
-		return fmt.Errorf("server %s not found", id)
-	}
-	promptPtrs := make([]*mcp.ServerPrompt, len(prompts))
-	for i := range prompts {
-		promptPtrs[i] = &prompts[i]
-	}
-	srv.Server.AddPrompts(promptPtrs...)
-	return nil
+    if ctx.Components.Resources == nil {
+        ctx.Components.Resources = []models.ServerResource{}
+    }
+
+    for _, r := range resources {
+        ctx.Components.Resources = append(ctx.Components.Resources, models.ServerResource{
+            Name:        r.Name,
+            Description: r.Description,
+            URI:         r.URI,
+            MIMEType:    r.MIMEType,
+            Size:        r.Size,
+        })
+    }
+
+    if ctx.Definition.BuildType == "binary" {
+        return writeMainGo(ctx, sm.factory.workspace)
+    }
+
+    return nil
 }
 
-func (sm *ServerManager) AddResources(id string, resources []mcp.ServerResource) error {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
 
-	srv, ok := sm.servers[id]
+func (sm *ServerManager) GetTools(id string) ([]models.ServerTool, error) {
+	ctx, ok := sm.factory.registry[id]
 	if !ok {
-		return fmt.Errorf("server %s not found", id)
+		return nil, fmt.Errorf("server ID %s not found", id)
 	}
-	resourcePtrs := make([]*mcp.ServerResource, len(resources))
-	for i := range resources {
-		resourcePtrs[i] = &resources[i]
-	}
-	srv.Server.AddResources(resourcePtrs...)
-	return nil
+	return ctx.Components.Tools, nil
 }
+
+func (sm *ServerManager) GetPrompts(id string) ([]models.ServerPrompt, error) {
+	ctx, ok := sm.factory.registry[id]
+	if !ok {
+		return nil, fmt.Errorf("server ID %s not found", id)
+	}
+	return ctx.Components.Prompts, nil
+}
+
+func (sm *ServerManager) GetResources(id string) ([]models.ServerResource, error) {
+	ctx, ok := sm.factory.registry[id]
+	if !ok {
+		return nil, fmt.Errorf("server ID %s not found", id)
+	}
+	return ctx.Components.Resources, nil
+}
+
+
+func (sm *ServerManager) GetServerSnapshot(id string) (*models.McpServerInstanceSnapshot, error) {
+	ctx, ok := sm.factory.registry[id]
+	if !ok {
+		return nil, fmt.Errorf("server ID %s not found", id)
+	}
+	return &models.McpServerInstanceSnapshot{
+		ID:        id,
+		Tools:     ctx.Components.Tools,
+		Prompts:   ctx.Components.Prompts,
+		Resources: ctx.Components.Resources,
+	}, nil
+}
+

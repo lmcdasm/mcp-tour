@@ -16,7 +16,7 @@ func InitLogger(component string) *logrus.Entry {
 	logger.Out = os.Stdout
 
 	// Set the log level (customize as needed)
-	logger.SetLevel(logrus.InfoLevel)
+	logger.SetLevel(logrus.DebugLevel)
 
 	// Use text formatter with timestamp
 	logger.SetFormatter(&logrus.TextFormatter{

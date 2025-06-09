@@ -1,8 +1,324 @@
 basePath: /
+definitions:
+  jsonschema.Schema:
+    type: object
+  mcp.Annotations:
+    properties:
+      audience:
+        description: |-
+          Describes who the intended customer of this object or data is.
+
+          It can include multiple entries to indicate content useful for multiple
+          audiences (e.g., `["user", "assistant"]`).
+        items:
+          type: string
+        type: array
+      priority:
+        description: |-
+          Describes how important this data is for operating the server.
+
+          A value of 1 means "most important," and indicates that the data is
+          effectively required, while 0 means "least important," and indicates that the
+          data is entirely optional.
+        type: number
+    type: object
+  mcp.Prompt:
+    properties:
+      arguments:
+        description: A list of arguments to use for templating the prompt.
+        items:
+          $ref: '#/definitions/mcp.PromptArgument'
+        type: array
+      description:
+        description: An optional description of what this prompt provides
+        type: string
+      name:
+        description: The name of the prompt or prompt template.
+        type: string
+    type: object
+  mcp.PromptArgument:
+    properties:
+      description:
+        description: A human-readable description of the argument.
+        type: string
+      name:
+        description: The name of the argument.
+        type: string
+      required:
+        description: Whether this argument must be provided.
+        type: boolean
+    type: object
+  mcp.Resource:
+    properties:
+      annotations:
+        allOf:
+        - $ref: '#/definitions/mcp.Annotations'
+        description: Optional annotations for the client.
+      description:
+        description: |-
+          A description of what this resource represents.
+
+          This can be used by clients to improve the LLM's understanding of available
+          resources. It can be thought of like a "hint" to the model.
+        type: string
+      mimeType:
+        description: The MIME type of this resource, if known.
+        type: string
+      name:
+        description: |-
+          A human-readable name for this resource.
+
+          This can be used by clients to populate UI elements.
+        type: string
+      size:
+        description: |-
+          The size of the raw resource content, in bytes (i.e., before base64 encoding
+          or any tokenization), if known.
+
+          This can be used by Hosts to display file sizes and estimate context window
+          usage.
+        type: integer
+      uri:
+        description: The URI of this resource.
+        type: string
+    type: object
+  mcp.ServerPrompt:
+    properties:
+      prompt:
+        $ref: '#/definitions/mcp.Prompt'
+    type: object
+  mcp.ServerResource:
+    properties:
+      resource:
+        $ref: '#/definitions/mcp.Resource'
+    type: object
+  mcp.ToolAnnotations:
+    properties:
+      destructiveHint:
+        description: |-
+          If true, the tool may perform destructive updates to its environment. If
+          false, the tool performs only additive updates.
+
+          (This property is meaningful only when `readOnlyHint == false`)
+
+          Default: true
+        type: boolean
+      idempotentHint:
+        description: |-
+          If true, calling the tool repeatedly with the same arguments will have no
+          additional effect on the its environment.
+
+          (This property is meaningful only when `readOnlyHint == false`)
+
+          Default: false
+        type: boolean
+      openWorldHint:
+        description: |-
+          If true, this tool may interact with an "open world" of external entities. If
+          false, the tool's domain of interaction is closed. For example, the world of
+          a web search tool is open, whereas that of a memory tool is not.
+
+          Default: true
+        type: boolean
+      readOnlyHint:
+        description: |-
+          If true, the tool does not modify its environment.
+
+          Default: false
+        type: boolean
+      title:
+        description: A human-readable title for the tool.
+        type: string
+    type: object
+  models.AddPromptRequest:
+    properties:
+      prompt:
+        $ref: '#/definitions/mcp.ServerPrompt'
+    type: object
+  models.AddResourceRequest:
+    properties:
+      resource:
+        $ref: '#/definitions/mcp.ServerResource'
+    type: object
+  models.AddToolRequest:
+    type: object
+  models.CreateMcpServerRequest:
+    properties:
+      addr:
+        example: :11000
+        type: string
+      buildtype:
+        example: binary
+        type: string
+      id:
+        example: my-server-1
+        type: string
+      transport:
+        example: http
+        type: string
+      version:
+        example: v1.0.0
+        type: string
+    type: object
+  models.GenericResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  models.HcResponse:
+    properties:
+      hc_msg:
+        type: string
+      status:
+        type: string
+    type: object
 info:
   contact: {}
   description: APIs for MCP Server Instantiation, Configuration and Handling
   title: MCP Explorer - MCP Server APIs
   version: 0.0.3
-paths: {}
+paths:
+  /servers:
+    get:
+      responses:
+        "200":
+          description: alive - HC Passed
+          schema:
+            $ref: '#/definitions/models.HcResponse'
+      summary: ServerManager HealthCheck
+      tags:
+      - servers
+  /servers/{id}/prompts:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Server ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Prompt definition payload
+        in: body
+        name: prompt
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddPromptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: invalid prompt json
+          schema:
+            type: string
+        "500":
+          description: failed to add prompt
+          schema:
+            type: string
+      summary: Add a Prompt to MCP Server
+      tags:
+      - servers
+  /servers/{id}/resources:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Server ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Resource definition payload
+        in: body
+        name: resource
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddResourceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: invalid resource json
+          schema:
+            type: string
+        "500":
+          description: failed to add resource
+          schema:
+            type: string
+      summary: Add a Resource to MCP Server
+      tags:
+      - servers
+  /servers/{id}/tools:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Server ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tool definition payload
+        in: body
+        name: tool
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddToolRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: invalid tool json
+          schema:
+            type: string
+        "500":
+          description: failed to add tool
+          schema:
+            type: string
+      summary: Add a Tool to MCP Server
+      tags:
+      - servers
+  /servers/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Server Definition
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMcpServerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: created
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: invalid JSON
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+      summary: Create MCP Server Instance
+      tags:
+      - servers
 swagger: "2.0"

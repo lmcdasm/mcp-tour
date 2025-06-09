@@ -7,5 +7,421 @@
         "version": "0.0.3"
     },
     "basePath": "/",
-    "paths": {}
+    "paths": {
+        "/servers": {
+            "get": {
+                "tags": [
+                    "servers"
+                ],
+                "summary": "ServerManager HealthCheck",
+                "responses": {
+                    "200": {
+                        "description": "alive - HC Passed",
+                        "schema": {
+                            "$ref": "#/definitions/models.HcResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/servers/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "servers"
+                ],
+                "summary": "Create MCP Server Instance",
+                "parameters": [
+                    {
+                        "description": "Server Definition",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMcpServerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "created",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid JSON",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/servers/{id}/prompts": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "servers"
+                ],
+                "summary": "Add a Prompt to MCP Server",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Server ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Prompt definition payload",
+                        "name": "prompt",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddPromptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid prompt json",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to add prompt",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/servers/{id}/resources": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "servers"
+                ],
+                "summary": "Add a Resource to MCP Server",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Server ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Resource definition payload",
+                        "name": "resource",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddResourceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid resource json",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to add resource",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/servers/{id}/tools": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "servers"
+                ],
+                "summary": "Add a Tool to MCP Server",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Server ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Tool definition payload",
+                        "name": "tool",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddToolRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid tool json",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to add tool",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "jsonschema.Schema": {
+            "type": "object"
+        },
+        "mcp.Annotations": {
+            "type": "object",
+            "properties": {
+                "audience": {
+                    "description": "Describes who the intended customer of this object or data is.\n\nIt can include multiple entries to indicate content useful for multiple\naudiences (e.g., `[\"user\", \"assistant\"]`).",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "priority": {
+                    "description": "Describes how important this data is for operating the server.\n\nA value of 1 means \"most important,\" and indicates that the data is\neffectively required, while 0 means \"least important,\" and indicates that the\ndata is entirely optional.",
+                    "type": "number"
+                }
+            }
+        },
+        "mcp.Prompt": {
+            "type": "object",
+            "properties": {
+                "arguments": {
+                    "description": "A list of arguments to use for templating the prompt.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/mcp.PromptArgument"
+                    }
+                },
+                "description": {
+                    "description": "An optional description of what this prompt provides",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The name of the prompt or prompt template.",
+                    "type": "string"
+                }
+            }
+        },
+        "mcp.PromptArgument": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "A human-readable description of the argument.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The name of the argument.",
+                    "type": "string"
+                },
+                "required": {
+                    "description": "Whether this argument must be provided.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "mcp.Resource": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Optional annotations for the client.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/mcp.Annotations"
+                        }
+                    ]
+                },
+                "description": {
+                    "description": "A description of what this resource represents.\n\nThis can be used by clients to improve the LLM's understanding of available\nresources. It can be thought of like a \"hint\" to the model.",
+                    "type": "string"
+                },
+                "mimeType": {
+                    "description": "The MIME type of this resource, if known.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "A human-readable name for this resource.\n\nThis can be used by clients to populate UI elements.",
+                    "type": "string"
+                },
+                "size": {
+                    "description": "The size of the raw resource content, in bytes (i.e., before base64 encoding\nor any tokenization), if known.\n\nThis can be used by Hosts to display file sizes and estimate context window\nusage.",
+                    "type": "integer"
+                },
+                "uri": {
+                    "description": "The URI of this resource.",
+                    "type": "string"
+                }
+            }
+        },
+        "mcp.ServerPrompt": {
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "$ref": "#/definitions/mcp.Prompt"
+                }
+            }
+        },
+        "mcp.ServerResource": {
+            "type": "object",
+            "properties": {
+                "resource": {
+                    "$ref": "#/definitions/mcp.Resource"
+                }
+            }
+        },
+        "mcp.ToolAnnotations": {
+            "type": "object",
+            "properties": {
+                "destructiveHint": {
+                    "description": "If true, the tool may perform destructive updates to its environment. If\nfalse, the tool performs only additive updates.\n\n(This property is meaningful only when `readOnlyHint == false`)\n\nDefault: true",
+                    "type": "boolean"
+                },
+                "idempotentHint": {
+                    "description": "If true, calling the tool repeatedly with the same arguments will have no\nadditional effect on the its environment.\n\n(This property is meaningful only when `readOnlyHint == false`)\n\nDefault: false",
+                    "type": "boolean"
+                },
+                "openWorldHint": {
+                    "description": "If true, this tool may interact with an \"open world\" of external entities. If\nfalse, the tool's domain of interaction is closed. For example, the world of\na web search tool is open, whereas that of a memory tool is not.\n\nDefault: true",
+                    "type": "boolean"
+                },
+                "readOnlyHint": {
+                    "description": "If true, the tool does not modify its environment.\n\nDefault: false",
+                    "type": "boolean"
+                },
+                "title": {
+                    "description": "A human-readable title for the tool.",
+                    "type": "string"
+                }
+            }
+        },
+        "models.AddPromptRequest": {
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "$ref": "#/definitions/mcp.ServerPrompt"
+                }
+            }
+        },
+        "models.AddResourceRequest": {
+            "type": "object",
+            "properties": {
+                "resource": {
+                    "$ref": "#/definitions/mcp.ServerResource"
+                }
+            }
+        },
+        "models.AddToolRequest": {
+            "type": "object"
+        },
+        "models.CreateMcpServerRequest": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "type": "string",
+                    "example": ":11000"
+                },
+                "buildtype": {
+                    "type": "string",
+                    "example": "binary"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "my-server-1"
+                },
+                "transport": {
+                    "type": "string",
+                    "example": "http"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "v1.0.0"
+                }
+            }
+        },
+        "models.GenericResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.HcResponse": {
+            "type": "object",
+            "properties": {
+                "hc_msg": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

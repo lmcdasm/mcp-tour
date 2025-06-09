@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mcp-go-server/manager"
 	"mcp-go-server/models"
+	//mcplib "mcp-go-server/mcplib"
 )
 
 // @Summary ServerManager HealthCheck
@@ -38,13 +39,15 @@ func CreateMcpServerInstance(sm *manager.ServerManager) gin.HandlerFunc {
 				Status: "failed",
 				Message: "invalid JSON input", 
 			})
+			return
 		}
-		if err := sm.AddServer(req.ID, req.Addr, req.Version); err != nil {
+		if err := sm.AddServer(req.ID, req.Addr, req.Version, req.Transport, req.BuildType); err != nil {
 			msg := fmt.Sprintf("Failed to Add Server with %v", err)
 			c.JSON(http.StatusInternalServerError, models.GenericResponse {
 				Status: "internal error",
 				Message: msg,
 			})
+			return
 		}
 
 		msg := "MCP Server Instance Created with ID: " + req.ID
@@ -55,46 +58,26 @@ func CreateMcpServerInstance(sm *manager.ServerManager) gin.HandlerFunc {
 	}
 }
 
-// @Summary Add Components (tools/prompts/resources) to MCP Server
-// @Tags servers
-// @Accept json
+
+// GetMcpServerInstance returns the full in-memory snapshot of a server
+// @Summary Get full MCP Server definition
 // @Produce json
-// @Param request body models.AddMcpServerComponentRequest true "Components"
-// @Success 200 {string} models.GenericResponse "components added"
-// @Failure 400 {string} models.GenericResponse "invalid JSON"
-// @Failure 500 {string} models.GenericResponse "internal error"
-// @Router /servers/add_components [post]
-func AddMcpServerComponents(sm *manager.ServerManager) gin.HandlerFunc {
+// @Param id path string true "Server ID"
+// @Success 200 {object} models.McpServerInstanceSnapshot
+// @Failure 404 {object} models.GenericResponse
+// @Router /servers/{id} [get]
+func GetMcpServerInstance(sm *manager.ServerManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req models.AddMcpServerComponentRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.String(http.StatusBadRequest, "invalid JSON")
+		id := c.Param("id")
+		snapshot, err := sm.GetServerSnapshot(id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, models.GenericResponse{
+				Status:  "error",
+				Message: err.Error(),
+			})
 			return
 		}
-
-		if len(req.Tools) > 0 {
-			if err := sm.AddTools(req.ServerID, req.Tools); err != nil {
-				c.String(http.StatusInternalServerError, "failed to add tools: %v", err)
-				return
-			}
-		}
-		if len(req.Prompts) > 0 {
-			if err := sm.AddPrompts(req.ServerID, req.Prompts); err != nil {
-				c.String(http.StatusInternalServerError, "failed to add prompts: %v", err)
-				return
-			}
-		}
-		if len(req.Resources) > 0 {
-			if err := sm.AddResources(req.ServerID, req.Resources); err != nil {
-				c.String(http.StatusInternalServerError, "failed to add resources: %v", err)
-				return
-			}
-		}
-		msg := "MCP Server Instance " + req.ServerID + " Components Updated"
-		c.JSON(http.StatusOK, models.GenericResponse {
-			Status: "success",
-			Message: msg, 
-		})
+		c.JSON(http.StatusOK, snapshot)
 	}
 }
 

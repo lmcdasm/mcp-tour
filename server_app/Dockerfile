@@ -43,11 +43,6 @@ COPY main-app/. ./
 # Build the swagger files
 RUN swag init --generalInfo main.go --output docs
 
-# Cache the Go Build in the compiler cache to improve / use docker compiler cache
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    go build .
-
 # Build ARGS
 ARG package=.
 ARG ldflags
@@ -60,7 +55,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     -o mcp-go-server-manager ${package}
 
 ## STAGE 2 - Create Production Image
-FROM gcr.io/distroless/static:nonroot
+#FROM gcr.io/distroless/static:nonroot
+FROM ubuntu:latest
 WORKDIR /
 COPY --from=builder /workspace/mcp-go-server-manager .
 # Use uid of nonroot user (65532) because kubernetes expects numeric user when applying pod security policies
