@@ -6,6 +6,9 @@
 
 app=mcp-go-server-manager
 version=latest 
+
+docker stop mcp-go-server-manager
+docker rm  mcp-go-server-manager
 docker run -d --name mcp-go-server-manager \
 	--privileged \
 	--restart=always \

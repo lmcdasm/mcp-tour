@@ -1,54 +1,58 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
-	ginprom "github.com/zsais/go-gin-prometheus"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/zsais/go-gin-prometheus"
 
-	_ "mcp-go-server/docs"
+	_ "mcp-go-server/docs" // Required for Swaggo
+
 	"mcp-go-server/manager"
+	"mcp-go-server/logutil"
 )
+
+const version = "0.0.3"
+var component_name = "server-manager-main"
+var log = logutil.InitLogger(component_name)
 
 // @title MCP Explorer - MCP Server APIs
 // @version 0.0.3
 // @description APIs for MCP Server Instantiation, Configuration and Handling
 // @BasePath /
-
 func main() {
-	log.Println("MCP Explorer - Server Manager Startup")
+	log.Infof("MCP Explorer - Starting %s, version: %s", component_name, version)
 
-	// Create the MCP server manager instance
+	// Init manager
 	serverMgr := manager.NewServerManager()
 
-	// Setup Gin
+	// Primary app router
 	mainRouter := gin.Default()
+	// Metrics router (on port 9100)
 	metricsRouter := gin.Default()
 
-	// Set up Swagger
-	mainRouter.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// Init API routes
-	initializeRoutes(mainRouter, serverMgr)
-
-	// Setup Prometheus metrics
-	prom := ginprom.NewPrometheus("mcp")
+	// Attach Prometheus metrics to metrics router
+	prom := ginprometheus.NewPrometheus("mcp_metrics")
 	prom.Use(metricsRouter)
 
-	// Start metrics server
+	// Swagger UI
+	mainRouter.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Routes
+	initializeRoutes(mainRouter, serverMgr)
+
+	// Launch main server
 	go func() {
-		log.Println("Metrics server listening on :10011")
-		if err := metricsRouter.Run(":10011"); err != nil {
-			log.Fatalf("Metrics server error: %v", err)
+		log.Infof("Starting main MCP API on :10010")
+		if err := mainRouter.Run(":10010"); err != nil {
+			log.Fatalf("Main server error: %v", err)
 		}
 	}()
 
-	// Start API server
-	log.Println("MCP API server listening on :10010")
-	if err := mainRouter.Run(":10010"); err != nil {
-		log.Fatalf("API server error: %v", err)
+	// Launch metrics server
+	log.Infof("Starting metrics server on :9100")
+	if err := metricsRouter.Run(":9100"); err != nil {
+		log.Fatalf("Metrics server error: %v", err)
 	}
 }
 
