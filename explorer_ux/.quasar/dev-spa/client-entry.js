@@ -52,7 +52,7 @@ const publicPath = `/`
 async function start ({
   app,
   router
-  , store
+  
 }, bootFiles) {
   
   let hasRedirected = false
@@ -88,7 +88,7 @@ async function start ({
       await bootFiles[i]({
         app,
         router,
-        store,
+        
         ssrContext: null,
         redirect,
         urlPath,
@@ -144,7 +144,9 @@ createQuasarApp(createApp, quasarUserOptions)
 
     return Promise[ method ]([
       
-      import('boot/sse')
+      import('boot/sse'),
+      
+      import('boot/pinia')
       
     ]).then(bootFiles => {
       const boot = mapFn(bootFiles).filter(entry => typeof entry === 'function')
