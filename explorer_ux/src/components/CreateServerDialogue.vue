@@ -31,7 +31,9 @@
 
 <script setup>
 import { ref, watch, defineEmits, defineProps } from 'vue'
+import { useCurrentCanvasStore } from 'src/stores/currentCanvasStore'
 
+const canvasStore = useCurrentCanvasStore()
 const emit = defineEmits(['update:modelValue', 'confirm'])
 const props = defineProps({ modelValue: Boolean })
 
@@ -58,7 +60,16 @@ function reset() {
 }
 
 function confirm() {
-  emit('confirm', { ...form.value })
+  const newNode = {
+    id: form.value.id,
+    type: 'server',
+    label: form.value.id,
+    data: { ...form.value },
+    source: 'canvas'
+  }
+  canvasStore.addNode(newNode)
+  canvasStore.setContext(newNode.id)
+  emit('confirm', newNode)
   dialog.value = false
   reset()
 }
