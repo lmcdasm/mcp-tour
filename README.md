@@ -37,7 +37,6 @@ In all cases, the appropriate slogans/headers and other markups are all left int
 The LICENSES directory contains all liceneses inherited from 3rd parties 
 
 
-asdf
 asd
 asd
-
+asd

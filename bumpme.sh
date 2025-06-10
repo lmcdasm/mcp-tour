@@ -1,5 +1,4 @@
 #!/bin/bash
-#set -x
 set -euo pipefail
 trap 'echo "❌ Script failed at line $LINENO: $BASH_COMMAND"' ERR
 
@@ -12,7 +11,10 @@ if [[ -z "$BUMP_TYPE" || -z "$MSG" ]]; then
   exit 1
 fi
 
+# Get current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Get latest semver-style tag
 LATEST_TAG=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$' | sort -V | tail -n 1)
 
 if [[ -z "$LATEST_TAG" ]]; then
@@ -23,11 +25,11 @@ if [[ -z "$LATEST_TAG" ]]; then
 else
   VERSION=$(echo "$LATEST_TAG" | cut -d '-' -f1)
   SUFFIX=$(echo "$LATEST_TAG" | grep -oE '\-[a-zA-Z0-9]+$' || echo "-alpha")
+
   MAJOR=$(echo "$VERSION" | cut -d. -f1 | sed 's/^0*//')
   MINOR=$(echo "$VERSION" | cut -d. -f2 | sed 's/^0*//')
   PATCH=$(echo "$VERSION" | cut -d. -f3 | sed 's/^0*//')
 
-  # fallback to zero if empty
   MAJOR=${MAJOR:-0}
   MINOR=${MINOR:-0}
   PATCH=${PATCH:-0}
@@ -37,16 +39,16 @@ echo "📌 Current version: ${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 
 case "$BUMP_TYPE" in
   major)
-    ((MAJOR++))
+    MAJOR=$((MAJOR + 1))
     MINOR=0
     PATCH=0
     ;;
   minor)
-    ((MINOR++))
+    MINOR=$((MINOR + 1))
     PATCH=0
     ;;
   point)
-    ((PATCH++))
+    PATCH=$((PATCH + 1))
     ;;
   *)
     echo "Invalid bump type: $BUMP_TYPE"
