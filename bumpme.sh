@@ -1,5 +1,7 @@
 #!/bin/bash
 #set -x
+set -euo pipefail
+trap 'echo "❌ Script failed at line $LINENO: $BASH_COMMAND"' ERR
 
 BUMP_TYPE="$1"
 shift
