@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <q-layout-container>
+    <q-page-container>
       <!-- Top: Gauge cards -->
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-4">
@@ -35,7 +35,7 @@
           </q-card>
         </div>
       </div>
-    </q-layout-container>
+    </q-page-container>
   </q-page>
 </template>
 
@@ -63,6 +63,9 @@ const serverListRef = ref(null)
 const discoveryListRef = ref(null)
 
 onMounted(() => {
+  if (!window.__refs) {
+    window.__refs = {}
+  }
   // Expose all references globally for boot/sse.js
   window.__refs = {
     console: consoleRef,

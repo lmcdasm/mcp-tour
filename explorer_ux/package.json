@@ -17,6 +17,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "chart.js": "^4.4.9",
+    "d3": "^7.9.0",
     "pinia": "^3.0.3",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",

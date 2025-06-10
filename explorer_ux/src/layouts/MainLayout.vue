@@ -15,7 +15,7 @@
           MCP Exploration App
         </q-toolbar-title>
 
-        <div>MCP-Tour v0.0.2</div>
+        <div>MCP-Explorer v0.0.7</div>
       </q-toolbar>
     </q-header>
 
@@ -63,8 +63,8 @@ const linksList = [
     link: '/client_ops'
   },
   {
-    title: 'MCP Server Operations',
-    caption: 'MCP Server Side Implementations',
+    title: 'MCP Server Builder',
+    caption: 'MCP Server Builder ',
     icon: 'usb',
     link: '/server_ops'
   },
