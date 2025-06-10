@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 
 BUMP_TYPE="$1"
 shift
