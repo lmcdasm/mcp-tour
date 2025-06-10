@@ -1,23 +1,19 @@
 #!/bin/bash
-
 set -e
 
-BUMP_TYPE=$1
-MSG=$2
+BUMP_TYPE="$1"
+shift
+MSG="$*"
 
 if [[ -z "$BUMP_TYPE" || -z "$MSG" ]]; then
   echo "Usage: ./bumpme.sh [point|minor|major] \"tag message\""
   exit 1
 fi
 
-# Get current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-# Get latest semver-style tag
 LATEST_TAG=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$' | sort -V | tail -n 1)
 
 if [[ -z "$LATEST_TAG" ]]; then
-  echo "No existing tag found. Starting at 0.0.0-alpha"
   MAJOR=0
   MINOR=0
   PATCH=0
@@ -32,7 +28,7 @@ fi
 
 echo "📌 Current version: ${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 
-case $BUMP_TYPE in
+case "$BUMP_TYPE" in
   major)
     ((MAJOR++))
     MINOR=0
@@ -46,7 +42,7 @@ case $BUMP_TYPE in
     ((PATCH++))
     ;;
   *)
-    echo "Invalid bump type: $BUMP_TYPE (use point, minor, or major)"
+    echo "Invalid bump type: $BUMP_TYPE"
     exit 1
     ;;
 esac
@@ -54,21 +50,18 @@ esac
 NEW_TAG="${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 echo "🚀 New version will be: $NEW_TAG"
 
-# Check for changes
-if ! git diff-index --quiet HEAD --; then
-  echo "🔧 Committing changes to $BRANCH..."
-  git add -A .
-  git commit -m "$MSG"
+git add -A .
+if git diff --cached --quiet; then
+  echo "ℹ️ No file changes. Creating empty commit for tag..."
+  git commit --allow-empty -m "$MSG"
 else
-  echo "⚠️  No changes detected. Aborting."
-  exit 1
+  echo "🔧 Committing staged changes to $BRANCH..."
+  git commit -m "$MSG"
 fi
 
-# Tag
 echo "🏷️  Tagging commit as $NEW_TAG"
 git tag -a "$NEW_TAG" -m "$MSG"
 
-# Push commit and tag
 echo "📤 Pushing branch '$BRANCH' and tag '$NEW_TAG'..."
 git push origin "$BRANCH"
 git push origin "$NEW_TAG"
