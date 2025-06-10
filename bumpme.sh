@@ -21,9 +21,14 @@ if [[ -z "$LATEST_TAG" ]]; then
 else
   VERSION=$(echo "$LATEST_TAG" | cut -d '-' -f1)
   SUFFIX=$(echo "$LATEST_TAG" | grep -oE '\-[a-zA-Z0-9]+$' || echo "-alpha")
-  MAJOR=$(echo "$VERSION" | cut -d. -f1)
-  MINOR=$(echo "$VERSION" | cut -d. -f2)
-  PATCH=$(echo "$VERSION" | cut -d. -f3)
+  MAJOR=$(echo "$VERSION" | cut -d. -f1 | sed 's/^0*//')
+  MINOR=$(echo "$VERSION" | cut -d. -f2 | sed 's/^0*//')
+  PATCH=$(echo "$VERSION" | cut -d. -f3 | sed 's/^0*//')
+
+  # fallback to zero if empty
+  MAJOR=${MAJOR:-0}
+  MINOR=${MINOR:-0}
+  PATCH=${PATCH:-0}
 fi
 
 echo "📌 Current version: ${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
