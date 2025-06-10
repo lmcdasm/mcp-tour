@@ -11,14 +11,10 @@ if [[ -z "$BUMP_TYPE" || -z "$MSG" ]]; then
   exit 1
 fi
 
-# Current branch
+echo "🔄 Pulling latest commits and tags from origin/$(git rev-parse --abbrev-ref HEAD)..."
+git pull origin "$(git rev-parse --abbrev-ref HEAD)" --tags
+
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-# Ensure latest tags and commits from origin
-echo "🔄 Pulling latest commits and tags from origin/$BRANCH..."
-git pull origin "$BRANCH" --tags
-
-# Get latest semver tag
 LATEST_TAG=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$' | sort -V | tail -n 1)
 
 if [[ -z "$LATEST_TAG" ]]; then
@@ -39,24 +35,26 @@ else
   PATCH=${PATCH:-0}
 fi
 
-echo "📌 Current version: ${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
+echo "📌 Current version: $MAJOR.$MINOR.$PATCH$SUFFIX"
 
-# Bump logic
 case "$BUMP_TYPE" in
   major)
-    ((MAJOR++))
+    echo "🆙 Bumping MAJOR version"
+    MAJOR=$((MAJOR + 1))
     MINOR=0
     PATCH=0
     ;;
   minor)
-    ((MINOR++))
+    echo "🆙 Bumping MINOR version"
+    MINOR=$((MINOR + 1))
     PATCH=0
     ;;
   point)
-    ((PATCH++))
+    echo "🆙 Bumping PATCH version"
+    PATCH=$((PATCH + 1))
     ;;
   *)
-    echo "❌ Invalid bump type: $BUMP_TYPE (must be point, minor, or major)"
+    echo "❌ Invalid bump type: $BUMP_TYPE"
     exit 1
     ;;
 esac
@@ -64,17 +62,10 @@ esac
 NEW_TAG="${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 echo "🚀 New version will be: $NEW_TAG"
 
-# Disallow if tag already exists remotely
-if git ls-remote --tags origin | grep -q "refs/tags/${NEW_TAG}$"; then
-  echo "🚫 Tag $NEW_TAG already exists in remote. Aborting."
-  exit 1
-fi
-
-# Check for staged changes
+# Check for staged or unstaged changes
 git add -A .
-
 if git diff --cached --quiet; then
-  echo "🚫 No staged changes found. Aborting. Empty commits are not allowed."
+  echo "⚠️ No staged changes. Aborting. Empty commits are not allowed."
   exit 1
 fi
 
