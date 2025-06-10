@@ -11,10 +11,14 @@ if [[ -z "$BUMP_TYPE" || -z "$MSG" ]]; then
   exit 1
 fi
 
-# Get current branch
+# Current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Get latest semver-style tag
+# Ensure latest tags and commits from origin
+echo "🔄 Pulling latest commits and tags from origin/$BRANCH..."
+git pull origin "$BRANCH" --tags
+
+# Get latest semver tag
 LATEST_TAG=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$' | sort -V | tail -n 1)
 
 if [[ -z "$LATEST_TAG" ]]; then
@@ -37,21 +41,22 @@ fi
 
 echo "📌 Current version: ${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 
+# Bump logic
 case "$BUMP_TYPE" in
   major)
-    MAJOR=$((MAJOR + 1))
+    ((MAJOR++))
     MINOR=0
     PATCH=0
     ;;
   minor)
-    MINOR=$((MINOR + 1))
+    ((MINOR++))
     PATCH=0
     ;;
   point)
-    PATCH=$((PATCH + 1))
+    ((PATCH++))
     ;;
   *)
-    echo "Invalid bump type: $BUMP_TYPE"
+    echo "❌ Invalid bump type: $BUMP_TYPE (must be point, minor, or major)"
     exit 1
     ;;
 esac
@@ -59,14 +64,22 @@ esac
 NEW_TAG="${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 echo "🚀 New version will be: $NEW_TAG"
 
-git add -A .
-if git diff --cached --quiet; then
-  echo "ℹ️ No file changes. Creating empty commit for tag..."
-  git commit --allow-empty -m "$MSG"
-else
-  echo "🔧 Committing staged changes to $BRANCH..."
-  git commit -m "$MSG"
+# Disallow if tag already exists remotely
+if git ls-remote --tags origin | grep -q "refs/tags/${NEW_TAG}$"; then
+  echo "🚫 Tag $NEW_TAG already exists in remote. Aborting."
+  exit 1
 fi
+
+# Check for staged changes
+git add -A .
+
+if git diff --cached --quiet; then
+  echo "🚫 No staged changes found. Aborting. Empty commits are not allowed."
+  exit 1
+fi
+
+echo "🔧 Committing changes to $BRANCH..."
+git commit -m "$MSG"
 
 echo "🏷️  Tagging commit as $NEW_TAG"
 git tag -a "$NEW_TAG" -m "$MSG"
