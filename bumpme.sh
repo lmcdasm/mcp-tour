@@ -30,6 +30,8 @@ else
   PATCH=$(echo "$VERSION" | cut -d. -f3)
 fi
 
+echo "📌 Current version: ${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
+
 case $BUMP_TYPE in
   major)
     ((MAJOR++))
@@ -50,11 +52,17 @@ case $BUMP_TYPE in
 esac
 
 NEW_TAG="${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
+echo "🚀 New version will be: $NEW_TAG"
 
-# Stage + commit
-echo "🔧 Committing changes to $BRANCH..."
-git add -A .
-git commit -m "$MSG"
+# Check for changes
+if ! git diff-index --quiet HEAD --; then
+  echo "🔧 Committing changes to $BRANCH..."
+  git add -A .
+  git commit -m "$MSG"
+else
+  echo "⚠️  No changes detected. Aborting."
+  exit 1
+fi
 
 # Tag
 echo "🏷️  Tagging commit as $NEW_TAG"
@@ -66,5 +74,4 @@ git push origin "$BRANCH"
 git push origin "$NEW_TAG"
 
 echo "✅ Done: $NEW_TAG pushed with commit to $BRANCH"
-
 

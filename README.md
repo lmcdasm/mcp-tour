@@ -19,11 +19,15 @@ In the process, we will also setup a boilerplate to allow us to explore the Road
 
 ### How to Use
 
-- Clone project and decide if you want to build the client or the server first and "cd" into the appropriate driectory
-- run "go build -o mcp-client" (or mcp-server if you are doing the server") and build the binary
-- run the binary with "./mcp-client" (or ./mcp-server") to start the app.
+- Clone the project 
+- Build the Server_App, Client_App, Registry_App and Explorer_Ux programs (either binary or conatiners)
+- Start up the 4 Applications
 
-Note: You should generally start the server "first" so the client has something to connect "to" 
+- Open the various Application Endpoints:
+	- Explorer UX: https://<your-ip>:9000/
+	- Server Manager https://<your-ip>:10010/swagger/index.html (for API reference and tryout)
+	- Client Manager https://<your-ip>:10011/swagger/index.html (for API reference and tryout)
+	- Registry Manager https://<your-ip>:10012/swagger/index.html (for API reference and tryout)
 
 ### Other Libraries "hacked-in" 
 
