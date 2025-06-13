@@ -4,10 +4,9 @@
 
 ![MCP Architecture](resources/mcp-explorer-architecture.png)
 
-📄 [Download the Architecture PPT](resources/dasmlab-mcp-tour.pptx)
 
-![UX Preview](resources/mcp-explorer-ux-1.png)
 ![UX Preview](resources/mcp-explorer-ux-2.png)
+![UX Preview](resources/mcp-explorer-ux-1.png)
 
 ---
 
@@ -71,5 +70,3 @@ Please see the `LICENSES/` directory for full BSD/MIT license details for all th
 ## 📁 Resources
 
 - [Architecture Overview (PPT)](resources/mcp-tour-architecture.pptx)
-- ![Main Explorer UX Screenshot](resources/ux-preview.png)
-
