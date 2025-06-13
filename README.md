@@ -13,11 +13,6 @@ A Tour of the Model Context Protocol (MCP) using a Go-based implementation.
 
 image::mcp-architecture.png[Architecture Diagram, width=800]
 
-[NOTE]
-====
-This project builds on top of MCP's early concepts, including a Go-based SDK.
-Please consult the `LICENSES` directory for full license attributions (MIT/BSD) for Google and Anthropic work.
-====
 
 link:docs/mcp-tour-architecture.pptx[Download the Architecture Overview (PPT)]
 
@@ -67,3 +62,9 @@ Refer to the `LICENSES/` directory for BSD and MIT attributions used across this
 * link:docs/mcp-tour-architecture.pptx[MCP Architecture Overview (PPT)]
 * image::ux-preview.png[Main Explorer UX Screenshot]
 
+
+[NOTE]
+====
+This project builds on top of MCP's early concepts, including a Go-based SDK.
+Please consult the `LICENSES` directory for full license attributions (MIT/BSD) for Google and Anthropic work.
+====
