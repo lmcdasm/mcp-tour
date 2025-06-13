@@ -68,16 +68,16 @@
     <create-linking-dialogue
       v-model="dialog.link"
       :servers="currentCanvas.getFirstServer ? [currentCanvas.getFirstServer] : []"
-      :prompts="currentCanvas.getPrompts()"
-      :resources="currentCanvas.getResources()"
-      :tools="currentCanvas.getTools()"
+      :prompts="currentCanvas.getPrompts"
+      :resources="currentCanvas.getResources"
+      :tools="currentCanvas.getTools"
       @confirm="handleLinkCreate"
     />
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import * as d3 from 'd3'
 import { useCurrentCanvasStore } from 'src/stores/currentCanvasStore'
 
@@ -117,16 +117,20 @@ function handleDrop(event) {
     }
     dialog.value.server = true
   } else if (draggedType.value === 'link') {
-    dialog.value.link = true 
+       dialog.value.link = false // force-close in case
+       nextTick(() => dialog.value.link = true) 
   } else {
     dialog.value[draggedType.value] = true
   }
+  draggedType.value = null // <--  reset
 }
 
 function handleServerCreate(data) {
   const [x, y] = lastDropCoords.value
   const svg = d3.select(svgCanvas.value)
-  const group = svg.append('g').attr('transform', `translate(${x},${y})`)
+  const group = svg.append('g')
+    .attr('transform', `translate(${x},${y})`)
+    .attr('data-json', JSON.stringify(data)) 
 
   group.append('rect').attr('width', 140).attr('height', 60).attr('fill', '#ab47bc')
   group.append('text')
@@ -137,13 +141,14 @@ function handleServerCreate(data) {
     .text(data.id)
     .style('fill', '#fff')
 
-  currentCanvas.addNode({ type: 'server', id: data.id })
 }
 
 function handleNodeCreate(type, data) {
   const [x, y] = lastDropCoords.value
   const svg = d3.select(svgCanvas.value)
-  const group = svg.append('g').attr('transform', `translate(${x},${y})`)
+  const group = svg.append('g')
+    .attr('transform', `translate(${x},${y})`)
+    .attr('data-json', JSON.stringify(data)) 
 
   group.append('circle').attr('r', 30).attr('fill', typeColor(type))
   group.append('text')
@@ -153,7 +158,6 @@ function handleNodeCreate(type, data) {
     .style('font-size', '10px')
     .style('fill', '#fff')
 
-  currentCanvas.addNode({ type, id: data.id, linkTo: data.linkTo })
 }
 
 function handleLinkCreate(data) {
@@ -174,7 +178,6 @@ function handleLinkCreate(data) {
         .attr('stroke', 'black')
         .attr('stroke-width', 2)
 
-      currentCanvas.addLink({ from: data.from, to: targetId })
     }
   })
 }
@@ -226,7 +229,7 @@ onMounted(() => {
 <style scoped>
 .canvas-container {
   border: 1px solid #ccc;
-  min-height: 600px;
+  min-height: 500px;
   position: relative;
 }
 </style>

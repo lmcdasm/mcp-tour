@@ -1,12 +1,12 @@
 <template>
   <q-dialog v-model="dialog">
     <q-card style="min-width: 600px">
-      <!-- Row 1: Title -->
+      <!-- Title -->
       <q-card-section>
         <div class="text-h6">Create Link</div>
       </q-card-section>
 
-      <!-- Row 2: Source Server -->
+      <!-- Source Server -->
       <q-card-section>
         <q-card flat bordered class="bg-grey-2">
           <q-card-section>
@@ -18,7 +18,7 @@
         </q-card>
       </q-card-section>
 
-      <!-- Row 3: Targets -->
+      <!-- Target Selectors -->
       <q-card-section class="row q-col-gutter-md">
         <!-- Prompts -->
         <div class="col-4">
@@ -90,7 +90,7 @@
         </div>
       </q-card-section>
 
-      <!-- Row 4: Actions -->
+      <!-- Actions -->
       <q-card-actions align="right">
         <q-btn flat label="Cancel" @click="dialog = false" />
         <q-btn color="primary" label="Link" @click="confirm" />
@@ -100,17 +100,14 @@
 </template>
 
 <script setup>
-import { ref, watch, watchEffect, defineProps, defineEmits, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useCurrentCanvasStore } from 'src/stores/currentCanvasStore'
 
 const canvasStore = useCurrentCanvasStore()
 
 const props = defineProps({
   modelValue: Boolean,
-  servers: Array,
-  prompts: Array,
-  resources: Array,
-  tools: Array
+  servers: Array
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
@@ -123,33 +120,67 @@ const form = ref({
   tools: []
 })
 
-// sync dialog visibility
-watch(() => props.modelValue, val => (dialog.value = val))
-watch(dialog, val => emit('update:modelValue', val))
-
-// enable flags
 const enablePrompt = ref(false)
 const enableResource = ref(false)
 const enableTool = ref(false)
 
-watch(
-  () => canvasStore.currentContext.serverName,
-  (serverId) => {
-    if (serverId) {
-      console.log('[LinkingDialog] Detected context server update:', serverId)
-      form.value.server = serverId
-    }
-  },
-  { immediate: true }
-)
-
-watchEffect(() => {
-  console.log('[LinkingDialog] form.server =', form.value.server)
-  console.log('[LinkingDialog] currentContext =', canvasStore.currentContext)
+watch(() => props.modelValue, val => {
+  dialog.value = val
+  if (val) {
+    console.log('[LinkingDialog] dialog opened')
+    console.log('[LinkingDialog] canvasStore.nodes =', canvasStore.nodes)
+    console.log('[LinkingDialog] getPrompts =', canvasStore.getPrompts)
+    console.log('[LinkingDialog] getResources =', canvasStore.getResources)
+    console.log('[LinkingDialog] getTools =', canvasStore.getTools)
+  }
 })
 
+watch(() => canvasStore.currentContext.serverName, (serverId) => {
+  if (serverId) {
+    console.log('[LinkingDialog] Detected context server update:', serverId)
+    form.value.server = serverId
+  }
+}, { immediate: true })
 
 const displayServer = computed(() => form.value.server || 'No server found')
+
+// Grouping helper
+function groupBySource(items = []) {
+  const unwrap = (proxy) => JSON.parse(JSON.stringify(proxy))
+
+  const canvasItems = items
+    .map(unwrap)
+    .filter(i => i && i.source === 'canvas')
+    .map(i => ({
+      label: i.label || i.type?.toUpperCase() || i.id || 'unnamed',
+      value: i.id
+    }))
+
+  const liveItems = items
+    .map(unwrap)
+    .filter(i => i && i.source === 'live')
+    .map(i => ({
+      label: i.label || i.type?.toUpperCase() || i.id || 'unnamed',
+      value: i.id
+    }))
+
+  console.log('[groupBySource] Canvas:', canvasItems)
+  console.log('[groupBySource] Live:', liveItems)
+
+  return [
+    { label: '--- Canvas ---', children: canvasItems },
+    { label: '--- Live ---', children: liveItems }
+  ]
+}
+
+// Wrapping to trigger reactivity properly
+const prompts = computed(() => [...canvasStore.getPrompts])
+const resources = computed(() => [...canvasStore.getResources])
+const tools = computed(() => [...canvasStore.getTools])
+
+const groupedPrompts = computed(() => groupBySource(prompts.value))
+const groupedResources = computed(() => groupBySource(resources.value))
+const groupedTools = computed(() => groupBySource(tools.value))
 
 function confirm() {
   emit('confirm', {
@@ -160,29 +191,5 @@ function confirm() {
   })
   dialog.value = false
 }
-
-// Grouping utility
-function groupBySource(items) {
-  return [
-    {
-      label: '--- Canvas ---',
-      children: items.filter(i => i.source === 'canvas').map(i => ({
-        label: i.id,
-        value: i.id
-      }))
-    },
-    {
-      label: '--- Live ---',
-      children: items.filter(i => i.source === 'live').map(i => ({
-        label: i.id,
-        value: i.id
-      }))
-    }
-  ]
-}
-
-const groupedPrompts = computed(() => groupBySource(props.prompts))
-const groupedResources = computed(() => groupBySource(props.resources))
-const groupedTools = computed(() => groupBySource(props.tools))
 </script>
 
