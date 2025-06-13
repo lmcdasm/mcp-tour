@@ -30,7 +30,7 @@ This allows a user to author MCP Clients, MCP Servers as well as orchestrate the
 
 - `client_app/` – Go-based MCP client that connects to an MCP server and interacts using the protocol.
 - `server_app/` – Go-based MCP server that handles requests from clients, optionally routes to LLMs or external services.
-- `explorer_ux/` �~@~S Vue.js (argon/bootstrap) UX interface for Authoring MCP Clients, MCP Servers and infrastructure to deploy your MCPs on.
+- `explorer_ux/` - Vue.js (argon/bootstrap) UX interface for Authoring MCP Clients, MCP Servers and infrastructure to deploy your MCPs on.
 - `mcp_src/` – Sourced from [googlesource.com/tools/internal/mcp](https://go.googlesource.com/tools/internal/mcp), adjusted for standalone use.
 
 ---
