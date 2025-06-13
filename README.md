@@ -2,11 +2,12 @@
 
 > A Tour of the Model Context Protocol (MCP) using a Go-based implementation.
 
-![MCP Architecture](resources/mcp-architecture.png)
+![MCP Architecture](resources/mcp-explorer-architecture.png)
 
-📄 [Download the Architecture PPT](resources/mcp-tour-architecture.pptx)
+📄 [Download the Architecture PPT](resources/dasmlab-mcp-tour.pptx)
 
-![UX Preview](resources/ux-preview.png)
+![UX Preview](resources/mcp-explorer-ux-1.png)
+![UX Preview](resources/mcp-explorer-ux-2.png)
 
 ---
 
@@ -22,12 +23,15 @@ To experiment with the under-development MCP Go SDK and learn more about MCP’s
 
 This project also serves as a boilerplate and sandbox to explore roadmap concepts from the official MCP homepage.
 
+This allows a user to author MCP Clients, MCP Servers as well as orchestrate the desired infrastructure to run them on (docker, k8s, serverless) 
+
 ---
 
 ## 🗂 Project Layout
 
 - `client_app/` – Go-based MCP client that connects to an MCP server and interacts using the protocol.
 - `server_app/` – Go-based MCP server that handles requests from clients, optionally routes to LLMs or external services.
+- `explorer_ux/` ▒~@~S Vue.js (argon/bootstrap) UX interface for Authoring MCP Clients, MCP Servers and infrastructure to deploy your MCPs on.
 - `mcp_src/` – Sourced from [googlesource.com/tools/internal/mcp](https://go.googlesource.com/tools/internal/mcp), adjusted for standalone use.
 
 ---
