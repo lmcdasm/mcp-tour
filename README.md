@@ -1,38 +1,69 @@
-# mcp-tour
+= MCP Tour
+:toc: left
+:icons: font
+:sectnums:
+:source-highlighter: highlight.js
+:imagesdir: resources
+:docdir: resources
+:banner-caption: A Go-Lang Exploration of Model Context Protocol (MCP)
+:docfile: docs/mcp-tour-architecture.pptx
 
-A Tour of Model Context Protocol (MCP) using Go-Lang implementation
+[.lead]
+A Tour of the Model Context Protocol (MCP) using a Go-based implementation.
 
-!! Please ensure to look in LICENSES to find all the deserved credits (MIT) to Google and Anthropic. !!
+image::mcp-architecture.png[Architecture Diagram, width=800]
 
-## Goal
+[NOTE]
+====
+This project builds on top of MCP's early concepts, including a Go-based SDK.
+Please consult the `LICENSES` directory for full license attributions (MIT/BSD) for Google and Anthropic work.
+====
 
-To experiement with the currently under-development MCP GoSDK and at the same time learn a bit about MCP and the implementations.
+link:docs/mcp-tour-architecture.pptx[Download the Architecture Overview (PPT)]
 
-In the process, we will also setup a boilerplate to allow us to explore the Roadmapped items from the MCP homepage.
+image::ux-preview.png[UX Preview, width=700]
 
-### Project Layout
+== Goal
 
-- client_app - this is a go based MCP client application that will connect, using MCP, to a MCP Server
-- server_app - this is a go-based MCP Server application that talks MCP to clients and does things (LLM and/or calls to services, etc.)
-- mcp_src - this is a copy/paste out of https://go.googlesource.com/tools/internal/mcp
+To experiment with the under-development MCP Go SDK and learn more about MCP’s structure and implementation patterns.
 
+This project also serves as a boilerplate and sandbox to explore roadmap concepts from the official MCP homepage.
 
-### How to Use
+== Project Layout
 
-- Clone the project 
-- Build the Server_App, Client_App, Registry_App and Explorer_Ux programs (either binary or conatiners)
-- Start up the 4 Applications
+* `client_app/` – Go-based MCP client that connects to an MCP server and interacts using the protocol.
+* `server_app/` – Go-based MCP server that handles requests from clients, optionally routes to LLMs or external services.
+* `mcp_src/` – Sourced from https://go.googlesource.com/tools/internal/mcp – adjusted for standalone use.
 
-- Open the various Application Endpoints:
-	- Explorer UX: https://<your-ip>:9000/
-	- Server Manager https://<your-ip>:10010/swagger/index.html (for API reference and tryout)
-	- Client Manager https://<your-ip>:10011/swagger/index.html (for API reference and tryout)
-	- Registry Manager https://<your-ip>:10012/swagger/index.html (for API reference and tryout)
+== How to Use
 
-### Other Libraries "hacked-in" 
+. Clone the repository.
+. Build the following components:
+  * `server_app`
+  * `client_app`
+  * `registry_app`
+  * `explorer_ux`
+. Run all four applications.
 
-The MCP internal project uses other libraries from within googlesource.com/tools/internal packages.  The LICENSES directory has the BSD-License that is used with internal projects from Google, all libraries have had only their import statements changes to function in most cases.
+=== Accessing Applications
 
-In all cases, the appropriate slogans/headers and other markups are all left intact.
-The LICENSES directory contains all liceneses inherited from 3rd parties 
+Access via the following endpoints once running (adjust for your IP/domain):
+
+* *Explorer UX*: https://<your-ip>:9000/
+* *Server Manager*: https://<your-ip>:10010/swagger/index.html
+* *Client Manager*: https://<your-ip>:10011/swagger/index.html
+* *Registry Manager*: https://<your-ip>:10012/swagger/index.html
+
+== External Libraries
+
+The MCP source tree (`mcp_src/`) includes code from Google's internal toolchain at `googlesource.com/tools/internal`.
+
+Adjustments were limited to import paths and compatibility fixes. All original licensing headers and notices have been preserved.
+
+Refer to the `LICENSES/` directory for BSD and MIT attributions used across this project.
+
+== Resources
+
+* link:docs/mcp-tour-architecture.pptx[MCP Architecture Overview (PPT)]
+* image::ux-preview.png[Main Explorer UX Screenshot]
 
